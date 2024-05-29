@@ -31,6 +31,7 @@ export const createPurchase = async (data: any) => {
 
   // Usar uma transação para garantir atomicidade
   const purchase = await prisma.$transaction(async (prisma) => {
+    
     // Debitar a quantidade do estoque
     for (const product of itemShoppings) {
       await prisma.product.update({
