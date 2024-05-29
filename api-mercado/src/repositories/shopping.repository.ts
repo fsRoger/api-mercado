@@ -1,12 +1,12 @@
 import { prisma } from "../services/prisma";
 
 export const createPurchase = async (data: any) => {
-  const { client_name, delivery_date, products } = data;
+  const { client_name, delivery_date, itemShoppings } = data;
 
   // Verificar a quantidade disponível para cada produto
   const unavailableProducts = [];
 
-  for (const product of products) {
+  for (const product of itemShoppings) {
     const dbProduct = await prisma.product.findUnique({
       where: { id: product.productId },
     });
@@ -32,7 +32,7 @@ export const createPurchase = async (data: any) => {
   // Usar uma transação para garantir atomicidade
   const purchase = await prisma.$transaction(async (prisma) => {
     // Debitar a quantidade do estoque
-    for (const product of products) {
+    for (const product of itemShoppings) {
       await prisma.product.update({
         where: { id: product.productId },
         data: {
@@ -50,7 +50,7 @@ export const createPurchase = async (data: any) => {
         client_name,
         delivery_date: new Date(delivery_date),
         itemShoppings: {
-          create: products.map((product: any) => ({
+          create: itemShoppings.map((product: any) => ({
             product_id: product.productId,
             quantity: product.quantity,
             price: product.price,
